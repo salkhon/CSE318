@@ -1,5 +1,5 @@
 #include "VariableOrderHeuristic.hpp"
 
-std::shared_ptr<Variable> VariableOrderHeuristic::next_var() {
-    return nullptr;
+VariableOrderHeuristic::VariableOrderHeuristic(CSPPtr csp_ptr):
+    csp_ptr{ csp_ptr } {
 }

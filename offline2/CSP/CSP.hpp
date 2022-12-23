@@ -13,6 +13,7 @@ struct CSP {
 
     CSP(int);
     VariablePtr get_variable(size_t, size_t);
+    const std::vector<VariablePtr>& get_all_var_ptrs();
     bool is_all_constraint_sat_so_far();
 private:
     std::vector<VariablePtr> var_ptrs;
