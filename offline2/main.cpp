@@ -3,10 +3,10 @@
 #include "CSPSolver/CSPSolver.hpp"
 
 int main() {
-    Variable variable{ {3, 4, 5} };
-    Constraint constraint;
+    Variable variable{ nullptr };
+    Constraint constraint{ nullptr };
     VariableOrderHeuristic voh;
-    CSP csp;
+    CSP csp{ 3 };
     CSPSolver csp_solver;
     return 0;
 }
