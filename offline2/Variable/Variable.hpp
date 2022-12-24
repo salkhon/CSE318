@@ -12,7 +12,7 @@ struct Variable {
     std::vector<int> domain;
     int val;
 
-    Variable(CSPPtr);
+    Variable(std::vector<int>, CSPPtr);
     bool is_assigned();
 private:
     const CSPPtr csp_ptr;

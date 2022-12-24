@@ -1,7 +1,7 @@
 #include "Variable.hpp"
 #include <numeric>
 
-Variable::Variable(CSPPtr csp_ptr):
+Variable::Variable(std::vector<int> domain, CSPPtr csp_ptr):
     csp_ptr{ csp_ptr }, domain{ csp_ptr->N }, val{ -1 } {
     std::iota(this->domain.begin(), this->domain.end(), 1); // fills (1, N)
 }

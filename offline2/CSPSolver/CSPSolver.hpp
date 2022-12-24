@@ -14,6 +14,8 @@ struct CSPSolver {
     CSPPtr csp_ptr;
     std::unordered_map<VariablePtr, int> assignments;
 
+    CSPSolver(std::vector<std::vector<int>>);
+    
+
     void solve();
-    int next_val(const VariablePtr);
 };

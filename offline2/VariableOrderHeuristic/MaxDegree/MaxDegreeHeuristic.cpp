@@ -1,18 +1,27 @@
 #include "MaxDegreeHeuristic.hpp"
 
+MaxDegreeHeuristic::MaxDegreeHeuristic(CSPPtr csp_ptr):
+    VariableOrderHeuristic{ csp_ptr } {
+}
+
 VariablePtr MaxDegreeHeuristic::next_var() {
     std::vector<int> unassignned_count = this->get_unassigned_var_count_for_each_row_col();
-    VariablePtr max_degree_var_ptr = nullptr;
-    int max_degree = -1;
+    VariablePtr target_var_ptr = nullptr, curr_var_ptr;
+    int target_degree = -1, curr_degree;
     for (size_t r = 0; r < this->csp_ptr->N; r++) {
         for (size_t c = 0; c < this->csp_ptr->N; c++) {
-            if (!this->csp_ptr->get_variable(r, c)->is_assigned() &&
-                (unassignned_count[r] + unassignned_count[c] - 2 > max_degree)) {
-                max_degree_var_ptr = this->csp_ptr->get_variable(r, c);
+            curr_var_ptr = this->csp_ptr->get_variable(r, c);
+            curr_degree = unassignned_count[r] + unassignned_count[this->csp_ptr->N + c] - 2;
+            if (
+                !curr_var_ptr->is_assigned() &&
+                curr_degree > target_degree
+                ) {
+                target_degree = curr_degree;
+                target_var_ptr = curr_var_ptr;
             }
         }
     }
-    return max_degree_var_ptr;
+    return target_var_ptr;
 }
 
 const std::vector<int> MaxDegreeHeuristic::get_unassigned_var_count_for_each_row_col() {

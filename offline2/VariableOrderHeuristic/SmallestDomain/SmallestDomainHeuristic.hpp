@@ -1,6 +1,6 @@
 #include "../VariableOrderHeuristic.hpp"
 #include "../../defs.hpp"
 
-class SmallestDomainHeuristic: VariableOrderHeuristic {
+struct SmallestDomainHeuristic: VariableOrderHeuristic {
     VariablePtr next_var();
 };

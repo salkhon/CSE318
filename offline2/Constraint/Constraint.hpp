@@ -3,10 +3,10 @@
 #include <vector>
 #include <memory>
 /**
- * @brief Each constraint consists of N variables. It is true if N variables are unique in the range (1, N).
+ * @brief Assigned variables in `var_ptrs` have to be unique.
  */
 struct Constraint {
-    Constraint(CSPPtr, std::vector<VariablePtr>);
+    Constraint(std::vector<VariablePtr>, CSPPtr);
     bool holds();
     int get_num_unassigned();
 private:

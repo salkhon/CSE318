@@ -11,8 +11,9 @@
 struct CSP {
     const int N;
 
-    CSP(int);
+    CSP(std::vector<std::vector<int>>&);
     VariablePtr get_variable(size_t, size_t);
+    void set_variable(size_t, size_t, VariablePtr);
     const std::vector<VariablePtr>& get_all_var_ptrs();
     const std::vector<ConstraintPtr>& get_all_constraint_ptrs();
 private:
