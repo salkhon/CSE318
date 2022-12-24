@@ -14,7 +14,7 @@ struct CSP {
     CSP(int);
     VariablePtr get_variable(size_t, size_t);
     const std::vector<VariablePtr>& get_all_var_ptrs();
-    bool is_all_constraint_sat_so_far();
+    const std::vector<ConstraintPtr>& get_all_constraint_ptrs();
 private:
     std::vector<VariablePtr> var_ptrs;
     std::vector<ConstraintPtr> constraint_ptrs;

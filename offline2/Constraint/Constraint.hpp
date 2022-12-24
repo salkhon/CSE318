@@ -8,6 +8,7 @@
 struct Constraint {
     Constraint(CSPPtr, std::vector<VariablePtr>);
     bool holds();
+    int get_num_unassigned();
 private:
     std::vector<VariablePtr> var_ptrs;
     CSPPtr csp_ptr;

@@ -34,3 +34,30 @@ VariablePtr CSP::get_variable(size_t row, size_t col) {
 const std::vector<VariablePtr>& CSP::get_all_var_ptrs() {
     return this->var_ptrs;
 }
+
+const std::vector<ConstraintPtr>& CSP::get_all_constraint_ptrs() {
+    return this->constraint_ptrs;
+}
+
+// /**
+//  * @brief A variable has constraints for row and column. The two constraints are in indexes `row` and `N+col`
+//  * given variable's index. (Faster implementation than looping over Constraint method)
+//  * 
+//  * @param row Variable row index
+//  * @param col Variable col index
+//  * @return int degree of the variable at (row, col)
+//  */
+// int CSP::get_var_degree(size_t row, size_t col) {
+//     int degree = 0;
+//     if (!this->get_variable(row, col)->is_assigned()) {
+//         for (size_t i = 0; i < this->N; i++) {
+//             if (i != col && !this->get_variable(row, i)->is_assigned()) {
+//                 degree++;
+//             }
+//             if (i != row && !this->get_variable(i, col)->is_assigned()) {
+//                 degree++;
+//             }
+//         }
+//     }
+//     return degree;
+// }
