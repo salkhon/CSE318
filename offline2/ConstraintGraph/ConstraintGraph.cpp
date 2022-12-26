@@ -15,6 +15,9 @@ std::vector<std::vector<int>> get_constraint_graph(const std::vector<VariablePtr
             if (var_ptrs[i]->row == var_ptrs[j]->row) {
                 constraint_graph[i].push_back(j);
                 constraint_graph[j].push_back(i);
+            } else if (var_ptrs[i]->col == var_ptrs[j]->col) {
+                constraint_graph[i].push_back(j);
+                constraint_graph[j].push_back(i);
             }
         }
     }

@@ -1,5 +1,6 @@
 #include "CSPSolver.hpp"
 #include <algorithm>
+#include <utility>
 #include "../VariableOrderHeuristic/VariableOrderHeuristic.hpp"
 #include "../VariableOrderHeuristic/SmallestDomain/SmallestDomainHeuristic.hpp"
 #include "../VariableOrderHeuristic/SmallestDomainMaxDegree/SmallestDomainMaxDegreeHeuristic.hpp"
@@ -18,70 +19,63 @@ CSPSolver::CSPSolver(std::vector<std::vector<int>> board, int voh, bool is_forwa
 }
 
 /**
- * @brief Create domain lists for each row by iterating through the board rows. 
- * 
+ * @brief Create domain lists for each row and column by iterating through board row and column.
+ *
  * @param board Board
- * @return std::vector<std::vector<int>> Mapping for each row domain list
+ * @return std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> Pair of mappings for each row and
+ * col list
  */
-std::vector<std::vector<int>> get_row_dom(const std::vector<std::vector<int>>& board) {
-    std::vector<bool> domain(board.size(), true); // idx i represents domain i+1
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+get_row_col_dom(const std::vector<std::vector<int>>& board) {
     std::vector<std::vector<int>> row_doms(board.size(), std::vector<int>{});
+    std::vector<std::vector<int>> col_doms(board.size(), std::vector<int>{});
 
-    for (size_t row = 0; row < board.size(); row++) {
-        for (size_t col = 0; col < board.size(); col++) {
-            if (board[row][col] != 0) {
-                domain[board[row][col]] = false;
+    std::vector<bool> row_domain(board.size(), true), col_domain(board.size(), true); // idx i represents domain i+1
+
+    for (size_t i = 0; i < board.size(); i++) {
+        for (size_t j = 0; j < board.size(); j++) {
+            // cross out domains for row i
+            if (board[i][j] != 0) {
+                row_domain[board[i][j]] = false;
+            }
+
+            // cross out domains for col i
+            if (board[j][i] != 0) {
+                col_domain[board[j][i]] = false;
             }
         }
 
-        for (size_t i = 0; i < board.size(); i++) {
-            if (domain[i]) {
-                row_doms[row].push_back(i + 1);
+        for (size_t k = 0; k < board.size(); k++) {
+            // if domain was not crossed out, add it to the list
+            if (row_domain[k]) {
+                row_doms[k].push_back(k + 1);
+            }
+
+            if (col_domain[k]) {
+                col_doms[k].push_back(k + 1);
             }
         }
-        std::sort(row_doms[row].begin(), row_doms[row].end());
+        // for computing set difference
+        std::sort(row_doms[i].begin(), row_doms[i].end());
+        std::sort(col_doms[i].begin(), col_doms[i].end());
 
-        std::fill(domain.begin(), domain.end(), false);
+        std::fill(row_domain.begin(), row_domain.end(), false);
+        std::fill(col_domain.begin(), col_domain.end(), false);
     }
 
-    return row_doms;
+    return std::make_pair(row_doms, col_doms);
 }
 
 /**
- * @brief Create domain lists for each column by iterating through the board columns. 
- * 
+ * @brief Construct a constraint graph from the board.
+ *
  * @param board Board
- * @return std::vector<std::vector<int>> Mapping for each col domain list
+ * @return ConstraintGraphPtr Constraint graph
  */
-std::vector<std::vector<int>> get_col_dom(const std::vector<std::vector<int>>& board) {
-    std::vector<bool> domain(board.size(), true); // idx i represents domain i+1
-    std::vector<std::vector<int>> col_doms(board.size(), std::vector<int>{});
-
-    for (size_t col = 0; col < board.size(); col++) {
-        for (size_t row = 0; row < board.size(); row++) {
-            if (board[row][col] != 0) {
-                domain[board[row][col]] = false;
-            }
-        }
-
-        for (size_t i = 0; i < board.size(); i++) {
-            if (domain[i]) {
-                col_doms[col].push_back(i + 1);
-            }
-        }
-        std::sort(col_doms[col].begin(), col_doms[col].end());
-
-        std::fill(domain.begin(), domain.end(), false);
-    }
-
-    return col_doms;
-}
-
 ConstraintGraphPtr get_constraint_graph(const std::vector<std::vector<int>>& board) {
     std::vector<VariablePtr> var_ptrs;
     int var_id = 0;
-    auto row_doms = get_row_dom(board);
-    auto col_doms = get_col_dom(board);
+    auto [row_doms, col_doms] = get_row_col_dom(board);
 
     for (size_t row = 0; row < board.size(); row++) {
         for (size_t col = 0; col < board.size(); col++) {
@@ -95,26 +89,7 @@ ConstraintGraphPtr get_constraint_graph(const std::vector<std::vector<int>>& boa
         }
     }
 
-    ConstraintGraphPtr constraint_graph_ptr = std::make_shared<ConstraintGraph>(var_id);
-    /**
-     * @brief Go through the board
-     * Each row and column start with domain N, then deduct non zero values, each variable on that row or col
-     * gets that deducted domain.
-     *
-     */
-    std::vector<bool> domain(board.size(), true);
-    int var_id = 0;
-    for (size_t row = 0; row < board.size(); row++) {
-        for (size_t col = 0; col < board.size(); col++) {
-            if (board[row][col] != 0) {
-                domain[board[row][col]] = false;
-            } else {
-                constraint_graph_ptr->var_ptrs[var_id]->row = row;
-                constraint_graph_ptr->var_ptrs[var_id]->col = col;
-                var_id++;
-            }
-        }
-    }
+    return std::make_shared<ConstraintGraph>(var_ptrs);
 }
 
 VOHPtr get_variable_order_heuristic(int voh) {
@@ -133,6 +108,21 @@ VOHPtr get_variable_order_heuristic(int voh) {
     }
 }
 
-void CSPSolver::solve() {
+/**
+ * @brief Checks if all the variables are assigned.
+ *
+ * @param var_ptrs Variables
+ * @return true if all variables have a value
+ * @return false otherwise
+ */
+bool is_all_vars_assigned(const std::vector<VariablePtr>& var_ptrs) {
+    return std::find_if(var_ptrs.begin(), var_ptrs.end(), [](VariablePtr var_ptr) {
+        return !var_ptr->is_assigned();
+        }) == var_ptrs.end();
+}
 
+void CSPSolver::solve() {
+    if (is_all_vars_assigned(this->constraint_graph_ptr->var_ptrs)) {
+        
+    }
 }
