@@ -1,17 +1,32 @@
 #include "Variable.hpp"
 #include <numeric>
 
-Variable::Variable(std::vector<int> domain, CSPPtr csp_ptr):
-    csp_ptr{ csp_ptr }, domain{ csp_ptr->N }, val{ -1 } {
-    std::iota(this->domain.begin(), this->domain.end(), 1); // fills (1, N)
+/**
+ * @brief Construct a new Variable:: Variable object
+ *
+ * @param id Variable id
+ * @param row Variable row
+ * @param col Variable column
+ * @param domain Domain for variable
+ */
+Variable::Variable(int id, int row, int col, std::vector<int> domain):
+    id{ id }, row{ row }, col{ col }, domain{ domain }, val{ -1 } {
 }
 
 /**
  * @brief Check if variable has been assigned a value.
- * 
+ *
  * @return true if `val` is within (1, N)
  * @return false otherwise
  */
 bool Variable::is_assigned() {
-    return this->val > 0 && this->val <= this->csp_ptr->N;
+    return this->val > 0;
+}
+
+/**
+ * @brief Clears variable assignment
+ *
+ */
+void Variable::erase_assignment() {
+    this->val = -1;
 }

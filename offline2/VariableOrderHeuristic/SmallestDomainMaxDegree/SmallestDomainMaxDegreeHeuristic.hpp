@@ -3,7 +3,7 @@
 #include "../MaxDegree/MaxDegreeHeuristic.hpp"
 
 struct SmallestDomainMaxDegreeHeuristic: VariableOrderHeuristic {
-    SmallestDomainMaxDegreeHeuristic(CSPPtr csp_ptr);
+    SmallestDomainMaxDegreeHeuristic(CSPPtrWk csp_ptrwk);
     VariablePtr next_var();
 private:
     MaxDegreeHeuristic max_degree_heuristic;

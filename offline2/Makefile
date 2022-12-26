@@ -1,8 +1,7 @@
-main: main.cpp ./Variable/Variable.cpp ./Constraint/Constraint.cpp	./VariableOrderHeuristic/VariableOrderHeuristic.cpp ./CSP/CSP.cpp ./CSPSolver/CSPSolver.cpp
+main: main.cpp ./CSPSolver/CSPSolver.cpp ./ConstraintGraph/ConstraintGraph.cpp ./Variable/Variable.cpp ./VariableOrderHeuristic/VariableOrderHeuristic.cpp  
 	g++ main.cpp ./Variable/Variable.cpp \
-	./Constraint/Constraint.cpp \
+	./ConstraintGraph/ConstraintGraph.cpp \
 	./VariableOrderHeuristic/VariableOrderHeuristic.cpp \
-	./CSP/CSP.cpp \
 	./CSPSolver/CSPSolver.cpp \
 	-o main.out
 

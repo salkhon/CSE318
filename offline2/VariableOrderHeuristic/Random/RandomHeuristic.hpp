@@ -2,6 +2,6 @@
 #include "../../defs.hpp"
 
 struct RandomHeuristic: VariableOrderHeuristic {
-    RandomHeuristic(CSPPtr);
+    RandomHeuristic(CSPPtrWk);
     VariablePtr next_var();
 };

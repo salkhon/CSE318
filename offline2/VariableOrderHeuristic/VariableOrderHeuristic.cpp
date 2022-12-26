@@ -1,5 +1,5 @@
 #include "VariableOrderHeuristic.hpp"
 
-VariableOrderHeuristic::VariableOrderHeuristic(CSPPtr csp_ptr):
-    csp_ptr{ csp_ptr } {
+VariableOrderHeuristic::VariableOrderHeuristic(CSPPtrWk csp_ptrwk):
+    csp_ptrwk{ csp_ptrwk } {
 }

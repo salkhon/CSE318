@@ -10,8 +10,8 @@
  *
  */
 struct VariableOrderHeuristic {
-    VariableOrderHeuristic(CSPPtr csp_ptr);
+    VariableOrderHeuristic(CSPPtrWk);
     virtual VariablePtr next_var() = 0;
 protected:
-    const CSPPtr csp_ptr;
+    const CSPPtrWk csp_ptrwk;
 };

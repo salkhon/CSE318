@@ -1,19 +1,17 @@
 #pragma once
 #include "../defs.hpp"
 #include <vector>
-#include "../CSP/CSP.hpp"
 
 /**
- * @brief Variable consists of a domain in internal (1, N), based on search progress. It may also contain a value
- * assignment, where valid assignments are in (1, N). Value assignments outside this range is invalid, and indicates
- * the variable is not assigned. 
+ * @brief Variable class with domain, board position and assigned value.
  */
 struct Variable {
+    const int id;
+    const int row, col;
     std::vector<int> domain;
     int val;
 
-    Variable(std::vector<int>, CSPPtr);
+    Variable(int, int, int, std::vector<int>);
     bool is_assigned();
-private:
-    const CSPPtr csp_ptr;
+    void erase_assignment();
 };
