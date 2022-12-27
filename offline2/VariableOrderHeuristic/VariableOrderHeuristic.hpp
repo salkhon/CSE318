@@ -4,14 +4,11 @@
 #include <memory>
 
 /**
- * @brief Provides next variable in the context of the current assignements in CSP. This cannot have a one time
- * method returning a list of variables, because as the search progresses and variables are assigned the order
- * needs to dynamically adapt. So a method to get next singular variable analyzing the current states is needed.
- *
+ * @brief Abstract class for getting next unassigned variable given the current state of the CSP. 
  */
 struct VariableOrderHeuristic {
-    VariableOrderHeuristic(CSPPtrWk);
+    VariableOrderHeuristic(ConstraintGraphPtrWk);
     virtual VariablePtr next_var() = 0;
 protected:
-    const CSPPtrWk csp_ptrwk;
+    const ConstraintGraphPtrWk constraint_graph_ptrwk;
 };

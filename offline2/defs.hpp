@@ -6,6 +6,7 @@
 #include <memory>
 
 using ConstraintGraphPtr = std::shared_ptr<ConstraintGraph>;
+using ConstraintGraphPtrWk = std::weak_ptr<ConstraintGraph>;
 using CSPSolverPtr = std::shared_ptr<CSPSolver>;
 using VariablePtr = std::shared_ptr<Variable>;
 using VOHPtr = std::shared_ptr<VariableOrderHeuristic>;

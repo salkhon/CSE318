@@ -1,7 +1,9 @@
+#pragma once
 #include "../VariableOrderHeuristic.hpp"
 #include "../../defs.hpp"
+#include <algorithm>
 
 struct SmallestDomainHeuristic: VariableOrderHeuristic {
-    SmallestDomainHeuristic(CSPPtrWk);
+    SmallestDomainHeuristic(ConstraintGraphPtrWk);
     VariablePtr next_var();
 };

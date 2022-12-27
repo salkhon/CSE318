@@ -1,6 +1,5 @@
 #include "CSPSolver.hpp"
 #include <algorithm>
-#include <utility>
 #include "../VariableOrderHeuristic/VariableOrderHeuristic.hpp"
 #include "../VariableOrderHeuristic/SmallestDomain/SmallestDomainHeuristic.hpp"
 #include "../VariableOrderHeuristic/SmallestDomainMaxDegree/SmallestDomainMaxDegreeHeuristic.hpp"
@@ -93,6 +92,7 @@ ConstraintGraphPtr get_constraint_graph(const std::vector<std::vector<int>>& boa
 }
 
 VOHPtr get_variable_order_heuristic(int voh) {
+    // TODO: pass in constaintg graph
     if (voh == 1) {
         return std::make_shared<SmallestDomainHeuristic>();
     } else if (voh == 2) {
@@ -134,6 +134,24 @@ void fill_solution_board(std::vector<std::vector<int>>& solution_board, const st
 }
 
 /**
+ * @brief Get the potential number of potential domain reductions as a result of the proposed assignment.
+ * 
+ * @param val Proposed value
+ * @param var_ptr Assignee
+ * @param constraint_graph_ptr Variable constraint graph
+ * @return int Number of domain potential domain reductions
+ */
+int num_overlap_with_neighbor_domain(int val, const VariablePtr var_ptr, const ConstraintGraphPtr constraint_graph_ptr) {
+    const auto& neighbors = constraint_graph_ptr->var_graph[var_ptr->id];
+    return std::count_if(neighbors.begin(), neighbors.end(),
+        [val, constraint_graph_ptr](int var_id) {
+            const auto& neighbor_domain = constraint_graph_ptr->var_ptrs[var_id]->domain;
+    return std::find(neighbor_domain.begin(), neighbor_domain.end(), val) != neighbor_domain.end();
+        }
+    );
+}
+
+/**
  * @brief Gets the value ordering for a variable. This prefers less constraining values first. Goes through the
  * domain and sorts on the number of reduced domain for the neighboring variables.
  *
@@ -141,7 +159,38 @@ void fill_solution_board(std::vector<std::vector<int>>& solution_board, const st
  * @return std::vector<int> Value ordering of the domain
  */
 std::vector<int> CSPSolver::get_var_val_order(VariablePtr var_ptr) {
+    std::vector<int> val_order{ var_ptr->domain };
+    std::sort(val_order.begin(), val_order.end(),
+        [var_ptr, this](int val1, int val2) {
+            return num_overlap_with_neighbor_domain(val1, var_ptr, this->constraint_graph_ptr) <
+            num_overlap_with_neighbor_domain(val2, var_ptr, this->constraint_graph_ptr);
+        }
+    );
+    return val_order;
+}
 
+/**
+ * @brief Remove the assigned value from the domain of neighboring variables.
+ *
+ * @param val Assigned value
+ * @param neighbor_vars Constraint neighbors of the assigned variable
+ * @param var_ptrs Variable id to object mapping
+ * @return std::vector<int> List of variable id's whose domain was reduced by assigned value
+ */
+std::vector<int> reduce_domain(int val, const std::vector<int>& neighbor_vars, const std::vector<VariablePtr>& var_ptrs) {
+    std::vector<int> reduced_vars;
+
+    for (auto neighbord_id : neighbor_vars) {
+        auto& neighbor_domain = var_ptrs[neighbord_id]->domain;
+        auto val_pos_iter = std::find(neighbor_domain.begin(), neighbor_domain.end(), val);
+        if (val_pos_iter != neighbor_domain.end()) {
+            // val found in neighbor domain
+            neighbor_domain.erase(val_pos_iter);
+            reduced_vars.push_back(neighbord_id);
+        }
+    }
+
+    return reduced_vars;
 }
 
 /**
@@ -152,12 +201,37 @@ std::vector<int> CSPSolver::get_var_val_order(VariablePtr var_ptr) {
  * @return true If domain reduction did not empty any domains
  * @return false otherwise
  */
-bool CSPSolver::inference(VariablePtr var_ptr) {
+std::pair<bool, std::vector<int>> CSPSolver::inference(VariablePtr var_ptr) {
     if (this->is_forward_checking) {
-        // TODO: do forward checking
-        return true;
+        auto reduced_vars = reduce_domain(var_ptr->val,
+            this->constraint_graph_ptr->var_graph[var_ptr->id],
+            this->constraint_graph_ptr->var_ptrs);
+
+        return std::make_pair(
+            std::find_if(
+                reduced_vars.begin(), reduced_vars.end(),
+                [this](int var_id) {
+                    return this->constraint_graph_ptr->var_ptrs[var_id]->domain.empty();
+                }
+            ) == reduced_vars.end(), // no empty domain list was found among the reduced_vars
+                    reduced_vars
+                    );
     } else {
-        return true; // no domain reduction, only initial consistency check
+        return std::make_pair(true, std::vector<int>{}); // no domain reduction, only initial consistency check
+    }
+}
+
+/**
+ * @brief Add back the domain reduced in forward checking as a part of backtracking.
+ *
+ * @param val Assigned value to be restored
+ * @param reduced_vars Variables (id) which were reduced during forward checking
+ */
+void CSPSolver::undo_inference(int val, const std::vector<int>& reduced_vars) {
+    if (this->is_forward_checking) {
+        for (auto var_id : reduced_vars) {
+            this->constraint_graph_ptr->var_ptrs[var_id]->domain.push_back(val);
+        }
     }
 }
 
@@ -175,17 +249,20 @@ bool CSPSolver::solve() {
     }
 
     // get variables according to the heuristic
-    auto var_ptr = this->voh_ptr->next_var(); // TODO: needs constraint graph
+    auto var_ptr = this->voh_ptr->next_var();
     // get least constraining value ordering
     for (int val : this->get_var_val_order(var_ptr)) {
         // initial neigbor consistency checking
         if (this->constraint_graph_ptr->is_consistent_assignment(val, var_ptr)) {
             var_ptr->val = val;
             // check if some domain becomes empty after reduction, if not proceed deeper in the branch
-            if (this->inference(var_ptr) && this->solve()) {
+            auto [is_success, reduced_vars] = this->inference(var_ptr);
+            if (is_success && this->solve()) {
                 return true;
             }
-            // if domain became empty of deeper branch failed - try another value
+            // undo domain reduction
+            this->undo_inference(val, reduced_vars);
+            // if domain became empty or deeper branch failed - try another value
             var_ptr->erase_assignment();
         }
     }

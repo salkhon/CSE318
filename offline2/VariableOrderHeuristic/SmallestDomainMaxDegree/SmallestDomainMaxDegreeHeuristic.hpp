@@ -1,10 +1,12 @@
+#pragma once
 #include "../VariableOrderHeuristic.hpp"
 #include "../../defs.hpp"
 #include "../MaxDegree/MaxDegreeHeuristic.hpp"
+#include <algorithm>
 
 struct SmallestDomainMaxDegreeHeuristic: VariableOrderHeuristic {
-    SmallestDomainMaxDegreeHeuristic(CSPPtrWk csp_ptrwk);
+    SmallestDomainMaxDegreeHeuristic(ConstraintGraphPtrWk);
     VariablePtr next_var();
 private:
-    MaxDegreeHeuristic max_degree_heuristic;
+    int degree(VariablePtr);
 };

@@ -2,6 +2,7 @@
 #include "../defs.hpp"
 #include <vector>
 #include <memory>
+#include <utility>
 #include <unordered_map>
 #include "../VariableOrderHeuristic/VariableOrderHeuristic.hpp"
 
@@ -19,5 +20,6 @@ struct CSPSolver {
     bool solve();
 private:
     std::vector<int> get_var_val_order(VariablePtr);
-    bool inference(VariablePtr);
+    std::pair<bool, std::vector<int>> inference(VariablePtr);
+    void undo_inference(int, const std::vector<int>&);
 };

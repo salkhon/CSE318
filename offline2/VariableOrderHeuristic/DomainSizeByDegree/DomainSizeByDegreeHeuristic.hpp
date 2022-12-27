@@ -3,8 +3,9 @@
 #include "../MaxDegree/MaxDegreeHeuristic.hpp"
 
 struct DomainSizeByDegreeHeuristic: public VariableOrderHeuristic {
-    DomainSizeByDegreeHeuristic(CSPPtrWk);
+    DomainSizeByDegreeHeuristic(ConstraintGraphPtrWk);
     VariablePtr next_var();
 private:
-    MaxDegreeHeuristic max_degree_heuristic;
+    double score(VariablePtr);
+    int degree(VariablePtr);
 };
