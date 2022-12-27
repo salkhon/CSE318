@@ -1,1 +1,0 @@
-If variables and constraints form a graph, and each assignment reduces the domains of adjacent variables. 

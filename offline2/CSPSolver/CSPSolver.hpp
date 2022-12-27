@@ -10,10 +10,14 @@
  */
 struct CSPSolver {
     std::vector<std::vector<int>> board;
+    std::vector<std::vector<int>> solution_board;
     ConstraintGraphPtr constraint_graph_ptr;
     VOHPtr voh_ptr;
     bool is_forward_checking;
 
     CSPSolver(std::vector<std::vector<int>>, int, bool = true);
-    void solve();
+    bool solve();
+private:
+    std::vector<int> get_var_val_order(VariablePtr);
+    bool inference(VariablePtr);
 };

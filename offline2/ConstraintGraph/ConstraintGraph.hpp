@@ -13,4 +13,5 @@ struct ConstraintGraph {
     ConstraintGraph(std::vector<VariablePtr>&);
     void add_constraint(int, int);
     int get_num_unassigned_var();
+    bool is_consistent_assignment(int value, VariablePtr var_ptr);
 };

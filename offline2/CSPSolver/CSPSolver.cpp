@@ -15,7 +15,7 @@
  * @param board The Latin Square Board, with `0` indicating variables.
  */
 CSPSolver::CSPSolver(std::vector<std::vector<int>> board, int voh, bool is_forward_checking = true):
-    board{ board }, voh_ptr{ get_variable_order_heuristic(voh) }, is_forward_checking{ is_forward_checking } {
+    board{ board }, solution_board{ board }, voh_ptr{ get_variable_order_heuristic(voh) }, is_forward_checking{ is_forward_checking } {
 }
 
 /**
@@ -121,8 +121,75 @@ bool is_all_vars_assigned(const std::vector<VariablePtr>& var_ptrs) {
         }) == var_ptrs.end();
 }
 
-void CSPSolver::solve() {
-    if (is_all_vars_assigned(this->constraint_graph_ptr->var_ptrs)) {
-        
+/**
+ * @brief When the assignment is complete, fill the board with the assigned values.
+ *
+ * @param solution_board Filled in baord
+ * @param var_ptrs Assignments
+ */
+void fill_solution_board(std::vector<std::vector<int>>& solution_board, const std::vector<VariablePtr>& var_ptrs) {
+    for (auto& var_ptr : var_ptrs) {
+        solution_board[var_ptr->row][var_ptr->col] = var_ptr->val;
     }
 }
+
+/**
+ * @brief Gets the value ordering for a variable. This prefers less constraining values first. Goes through the
+ * domain and sorts on the number of reduced domain for the neighboring variables.
+ *
+ * @param var_ptr Variable whose value ordering to get
+ * @return std::vector<int> Value ordering of the domain
+ */
+std::vector<int> CSPSolver::get_var_val_order(VariablePtr var_ptr) {
+
+}
+
+/**
+ * @brief If forward checking is enables, it reduces the domains of neighbors. If no domain gets emptied, inference
+ * is successful.
+ *
+ * @param var_ptr Variable whose assignment needs to be inferred
+ * @return true If domain reduction did not empty any domains
+ * @return false otherwise
+ */
+bool CSPSolver::inference(VariablePtr var_ptr) {
+    if (this->is_forward_checking) {
+        // TODO: do forward checking
+        return true;
+    } else {
+        return true; // no domain reduction, only initial consistency check
+    }
+}
+
+/**
+ * @brief Solves the latin square board
+ *
+ * @return true if successfull solve, solution in `solution_board` property
+ * @return false otherwise
+ */
+bool CSPSolver::solve() {
+    // if complete, fill solution board
+    if (is_all_vars_assigned(this->constraint_graph_ptr->var_ptrs)) {
+        fill_solution_board(this->solution_board, this->constraint_graph_ptr->var_ptrs);
+        return true;
+    }
+
+    // get variables according to the heuristic
+    auto var_ptr = this->voh_ptr->next_var(); // TODO: needs constraint graph
+    // get least constraining value ordering
+    for (int val : this->get_var_val_order(var_ptr)) {
+        // initial neigbor consistency checking
+        if (this->constraint_graph_ptr->is_consistent_assignment(val, var_ptr)) {
+            var_ptr->val = val;
+            // check if some domain becomes empty after reduction, if not proceed deeper in the branch
+            if (this->inference(var_ptr) && this->solve()) {
+                return true;
+            }
+            // if domain became empty of deeper branch failed - try another value
+            var_ptr->erase_assignment();
+        }
+    }
+    // no value succeeded, this branch failed
+    return false;
+}
+

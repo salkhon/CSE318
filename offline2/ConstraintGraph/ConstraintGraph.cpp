@@ -52,3 +52,24 @@ int ConstraintGraph::get_num_unassigned_var() {
         return !var_ptr->is_assigned();
         });
 }
+
+/**
+ * @brief Checks if the proposed value is within domain of variable and if any constraint neighbor has the same 
+ * value assigned.
+ * 
+ * @param value Proposed value
+ * @param var_ptr Variable to assign to
+ * @return true If value is in domain and no constraint neighbor has this value assigned
+ * @return false otherwise
+ */
+bool ConstraintGraph::is_consistent_assignment(int value, VariablePtr var_ptr) {
+    auto& var_domain = var_ptr->domain;
+    auto& var_adj_list = this->var_graph[var_ptr->id];
+    return (
+        find(var_domain.begin(), var_domain.end(), value) != var_domain.end() // value is in domain
+        &&
+        std::find_if(var_adj_list.begin(), var_adj_list.end(), [value, this](int var_id) {
+            return this->var_ptrs[var_id]->is_assigned() && this->var_ptrs[var_id]->val == value;
+            }) == var_adj_list.end() // no assigned neighbor has proposed value
+                );
+}
