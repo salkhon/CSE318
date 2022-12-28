@@ -1,6 +1,6 @@
 #include "SmallestDomainMaxDegreeHeuristic.hpp"
 
-SmallestDomainMaxDegreeHeuristic::SmallestDomainMaxDegreeHeuristic(ConstraintGraphPtrWk constraint_graph_ptrwk):
+SmallestDomainMaxDegreeHeuristic::SmallestDomainMaxDegreeHeuristic(const ConstraintGraphPtrWk constraint_graph_ptrwk):
     VariableOrderHeuristic{ constraint_graph_ptrwk } {
 }
 

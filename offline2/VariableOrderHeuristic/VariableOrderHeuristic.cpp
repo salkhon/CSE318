@@ -1,5 +1,5 @@
 #include "VariableOrderHeuristic.hpp"
 
-VariableOrderHeuristic::VariableOrderHeuristic(ConstraintGraphPtrWk constraint_graph_ptrwk):
+VariableOrderHeuristic::VariableOrderHeuristic(const ConstraintGraphPtrWk constraint_graph_ptrwk):
     constraint_graph_ptrwk{ constraint_graph_ptrwk } {
 }

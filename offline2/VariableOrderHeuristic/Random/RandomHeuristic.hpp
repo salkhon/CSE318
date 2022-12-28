@@ -1,11 +1,10 @@
 #pragma once
 #include "../VariableOrderHeuristic.hpp"
-#include "../../defs.hpp"
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
 
 struct RandomHeuristic: VariableOrderHeuristic {
-    RandomHeuristic(ConstraintGraphPtrWk);
+    RandomHeuristic(const ConstraintGraphPtrWk);
     VariablePtr next_var();
 };

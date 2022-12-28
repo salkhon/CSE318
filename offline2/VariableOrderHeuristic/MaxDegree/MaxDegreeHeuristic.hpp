@@ -1,8 +1,8 @@
+#pragma once
 #include "../VariableOrderHeuristic.hpp"
-#include "../../defs.hpp"
 
 struct MaxDegreeHeuristic: VariableOrderHeuristic {
-    MaxDegreeHeuristic(ConstraintGraphPtrWk);
+    MaxDegreeHeuristic(const ConstraintGraphPtrWk);
     VariablePtr next_var();
 private:
     int degree(VariablePtr);

@@ -1,9 +1,8 @@
+#pragma once
 #include "../VariableOrderHeuristic.hpp"
-#include "../../defs.hpp"
-#include "../MaxDegree/MaxDegreeHeuristic.hpp"
 
 struct DomainSizeByDegreeHeuristic: public VariableOrderHeuristic {
-    DomainSizeByDegreeHeuristic(ConstraintGraphPtrWk);
+    DomainSizeByDegreeHeuristic(const ConstraintGraphPtrWk);
     VariablePtr next_var();
 private:
     double score(VariablePtr);

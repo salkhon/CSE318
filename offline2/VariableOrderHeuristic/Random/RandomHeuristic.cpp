@@ -1,6 +1,6 @@
 #include "RandomHeuristic.hpp"
 
-RandomHeuristic::RandomHeuristic(ConstraintGraphPtrWk constraint_graph_ptrwk):
+RandomHeuristic::RandomHeuristic(const ConstraintGraphPtrWk constraint_graph_ptrwk):
     VariableOrderHeuristic{ constraint_graph_ptrwk } {
     std::srand(std::time(nullptr));
 }

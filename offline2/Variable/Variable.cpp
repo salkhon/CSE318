@@ -30,3 +30,12 @@ bool Variable::is_assigned() {
 void Variable::erase_assignment() {
     this->val = -1;
 }
+
+std::ostream& operator<<(std::ostream& ostrm, const Variable& var) {
+    ostrm << "< Variable " << var.id << " (" << var.row << "," << var.col << ") val=" << var.val << " [";
+    for (int dom : var.domain) {
+        ostrm << dom << ",";
+    }
+    ostrm << "] >";
+    return ostrm;
+}

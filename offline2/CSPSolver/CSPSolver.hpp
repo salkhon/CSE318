@@ -1,13 +1,13 @@
 #pragma once
-#include "../defs.hpp"
 #include <vector>
 #include <memory>
 #include <utility>
-#include <unordered_map>
+#include "../Variable/Variable.hpp"
+#include "../ConstraintGraph/ConstraintGraph.hpp"
 #include "../VariableOrderHeuristic/VariableOrderHeuristic.hpp"
 
 /**
- * @brief Initialize a CSP based on N, and solve it. 
+ * @brief Initialize a CSP based on N, and solve it.
  */
 struct CSPSolver {
     std::vector<std::vector<int>> board;
@@ -23,3 +23,5 @@ private:
     std::pair<bool, std::vector<int>> inference(VariablePtr);
     void undo_inference(int, const std::vector<int>&);
 };
+
+using CSPSolverPtr = std::shared_ptr<CSPSolver>;

@@ -1,7 +1,7 @@
 #include "DomainSizeByDegreeHeuristic.hpp"
 #include <limits>
 
-DomainSizeByDegreeHeuristic::DomainSizeByDegreeHeuristic(ConstraintGraphPtrWk constraint_graph_ptrwk):
+DomainSizeByDegreeHeuristic::DomainSizeByDegreeHeuristic(const ConstraintGraphPtrWk constraint_graph_ptrwk):
     VariableOrderHeuristic{ constraint_graph_ptrwk } {
 }
 

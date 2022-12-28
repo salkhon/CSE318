@@ -1,10 +1,9 @@
 #pragma once
-#include "../defs.hpp"
 #include "../Variable/Variable.hpp"
-#include <memory>
+#include "../ConstraintGraph/ConstraintGraph.hpp"
 
 /**
- * @brief Abstract class for getting next unassigned variable given the current state of the CSP. 
+ * @brief Abstract class for getting next unassigned variable given the current state of the CSP.
  */
 struct VariableOrderHeuristic {
     VariableOrderHeuristic(ConstraintGraphPtrWk);
@@ -12,3 +11,5 @@ struct VariableOrderHeuristic {
 protected:
     const ConstraintGraphPtrWk constraint_graph_ptrwk;
 };
+
+using VOHPtr = std::shared_ptr<VariableOrderHeuristic>;

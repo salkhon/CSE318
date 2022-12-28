@@ -1,6 +1,6 @@
 #include "SmallestDomainHeuristic.hpp"
 
-SmallestDomainHeuristic::SmallestDomainHeuristic(ConstraintGraphPtrWk constraint_graph_ptrwk):
+SmallestDomainHeuristic::SmallestDomainHeuristic(const ConstraintGraphPtrWk constraint_graph_ptrwk):
     VariableOrderHeuristic{ constraint_graph_ptrwk } {
 }
 

@@ -1,5 +1,4 @@
 #include "ConstraintGraph.hpp"
-#include <algorithm>
 
 /**
  * @brief Construct the constraint graph from the variables considering their row col positions.
@@ -54,9 +53,9 @@ int ConstraintGraph::get_num_unassigned_var() {
 }
 
 /**
- * @brief Checks if the proposed value is within domain of variable and if any constraint neighbor has the same 
+ * @brief Checks if the proposed value is within domain of variable and if any constraint neighbor has the same
  * value assigned.
- * 
+ *
  * @param value Proposed value
  * @param var_ptr Variable to assign to
  * @return true If value is in domain and no constraint neighbor has this value assigned
@@ -72,4 +71,21 @@ bool ConstraintGraph::is_consistent_assignment(int value, VariablePtr var_ptr) {
             return this->var_ptrs[var_id]->is_assigned() && this->var_ptrs[var_id]->val == value;
             }) == var_adj_list.end() // no assigned neighbor has proposed value
                 );
+}
+
+std::ostream& operator<<(std::ostream& ostrm, const ConstraintGraph& constraint_graph) {
+    ostrm << "Constraint Graph:\n";
+    ostrm << "\tVariables:\n";
+    for (auto& var_ptr : constraint_graph.var_ptrs) {
+        ostrm << "\t\t" << *var_ptr << "\n";
+    }
+    ostrm << "\tConstraints:\n";
+    for (size_t var_id = 0; var_id < constraint_graph.var_ptrs.size(); var_id++) {
+        ostrm << "\t\t[" << var_id << "]\t";
+        for (int neighbor_id : constraint_graph.var_graph[var_id]) {
+            ostrm << neighbor_id << "\t";
+        }
+        ostrm << "\n";
+    }
+    return ostrm;
 }

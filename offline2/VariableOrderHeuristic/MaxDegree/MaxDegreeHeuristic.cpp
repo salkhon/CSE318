@@ -1,6 +1,6 @@
 #include "MaxDegreeHeuristic.hpp"
 
-MaxDegreeHeuristic::MaxDegreeHeuristic(ConstraintGraphPtrWk constraint_graph_ptrwk):
+MaxDegreeHeuristic::MaxDegreeHeuristic(const ConstraintGraphPtrWk constraint_graph_ptrwk):
     VariableOrderHeuristic{ constraint_graph_ptrwk } {
 }
 

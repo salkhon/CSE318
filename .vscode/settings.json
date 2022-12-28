@@ -40,6 +40,8 @@
         "unordered_map": "cpp",
         "fstream": "cpp",
         "functional": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "ctime": "cpp",
+        "numeric": "cpp"
     }
 }
