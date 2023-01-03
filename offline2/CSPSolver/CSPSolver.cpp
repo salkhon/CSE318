@@ -92,15 +92,15 @@ ConstraintGraphPtr get_constraint_graph(const std::vector<std::vector<int>>& boa
 }
 
 VOHPtr get_variable_order_heuristic(const int voh, const ConstraintGraphPtr constraint_graph_ptr) {
-    if (voh == 1) {
+    if (voh == SMALLEST_DOMAIN) {
         return std::make_shared<SmallestDomainHeuristic>(constraint_graph_ptr);
-    } else if (voh == 2) {
+    } else if (voh == MAX_DEGREE) {
         return std::make_shared<MaxDegreeHeuristic>(constraint_graph_ptr);
-    } else if (voh == 3) {
+    } else if (voh == SMALLEST_DOM_WITH_MAX_DEGREE) {
         return std::make_shared<SmallestDomainMaxDegreeHeuristic>(constraint_graph_ptr);
-    } else if (voh == 4) {
+    } else if (voh == DOM_DEGREE_RATIO) {
         return std::make_shared<DomainSizeByDegreeHeuristic>(constraint_graph_ptr);
-    } else if (voh == 5) {
+    } else if (voh == RANDOM) {
         return std::make_shared<RandomHeuristic>(constraint_graph_ptr);
     } else {
         return nullptr;
@@ -115,8 +115,10 @@ VOHPtr get_variable_order_heuristic(const int voh, const ConstraintGraphPtr cons
  */
 CSPSolver::CSPSolver(std::vector<std::vector<int>> board, int voh, bool is_forward_checking):
     board{ board }, solution_board{ board }, constraint_graph_ptr{ get_constraint_graph(board) },
-    voh_ptr{ get_variable_order_heuristic(voh, constraint_graph_ptr) }, is_forward_checking{ is_forward_checking } {
-    std::cout << *this->constraint_graph_ptr;
+    voh_ptr{ get_variable_order_heuristic(voh, constraint_graph_ptr) }, is_forward_checking{ is_forward_checking },
+    num_nodes{ 0 }, num_backtrack{ 0 } {
+    // std::cout << *this->constraint_graph_ptr << std::endl;
+    // std::cout << "VOH=" << voh << "\t\t" << "forwardchecking=" << is_forward_checking << std::endl;
 }
 
 /**
@@ -205,7 +207,7 @@ std::vector<int> reduce_domain(int val, const std::vector<int>& neighbor_vars, c
 }
 
 /**
- * @brief If forward checking is enables, it reduces the domains of neighbors. If no domain gets emptied, inference
+ * @brief If forward checking is enabled, it reduces the domains of neighbors. If no domain gets emptied, inference
  * is successful.
  *
  * @param var_ptr Variable whose assignment needs to be inferred
@@ -259,6 +261,8 @@ bool CSPSolver::solve() {
         return true;
     }
 
+    this->num_nodes++;
+
     // get variables according to the heuristic
     auto var_ptr = this->voh_ptr->next_var();
     // get least constraining value ordering
@@ -270,7 +274,11 @@ bool CSPSolver::solve() {
             auto [is_success, reduced_vars] = this->inference(var_ptr);
             if (is_success && this->solve()) {
                 return true;
+            } else if (!is_success) {
+                this->num_nodes++; // inference is also a node exploration
             }
+
+            this->num_backtrack++;
             // undo domain reduction
             this->undo_inference(val, reduced_vars);
             // if domain became empty or deeper branch failed - try another value

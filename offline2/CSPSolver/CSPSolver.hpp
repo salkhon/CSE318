@@ -15,6 +15,7 @@ struct CSPSolver {
     ConstraintGraphPtr constraint_graph_ptr;
     VOHPtr voh_ptr;
     bool is_forward_checking;
+    unsigned long long num_nodes, num_backtrack;
 
     CSPSolver(std::vector<std::vector<int>>, int, bool = true);
     bool solve();
@@ -22,6 +23,10 @@ private:
     std::vector<int> get_var_val_order(VariablePtr);
     std::pair<bool, std::vector<int>> inference(VariablePtr);
     void undo_inference(int, const std::vector<int>&);
+};
+
+enum VOH {
+    SMALLEST_DOMAIN = 1, MAX_DEGREE, SMALLEST_DOM_WITH_MAX_DEGREE, DOM_DEGREE_RATIO, RANDOM
 };
 
 using CSPSolverPtr = std::shared_ptr<CSPSolver>;

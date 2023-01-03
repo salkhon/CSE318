@@ -42,6 +42,7 @@
         "functional": "cpp",
         "valarray": "cpp",
         "ctime": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "cstring": "cpp"
     }
 }
