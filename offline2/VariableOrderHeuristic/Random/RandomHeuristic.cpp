@@ -10,10 +10,12 @@ VariablePtr RandomHeuristic::next_var() {
 
     int random_unassigned_idx = std::rand() % constraint_graph_ptr->get_num_unassigned_var();
     int idx = 0;
-    VariablePtr target_var_ptr = *std::find_if(constraint_graph_ptr->var_ptrs.begin(), constraint_graph_ptr->var_ptrs.end(),
-        [random_unassigned_idx, &idx](VariablePtr var_ptr) {
-            return !var_ptr->is_assigned() && idx++ == random_unassigned_idx;
-        });
-
+    VariablePtr target_var_ptr = nullptr;
+    for (auto var_ptr : constraint_graph_ptr->var_ptrs) {
+        if (!var_ptr->is_assigned() && idx++ == random_unassigned_idx) {
+            target_var_ptr = var_ptr;
+            break;
+        }
+    }
     return target_var_ptr;
 }

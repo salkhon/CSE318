@@ -44,9 +44,11 @@ void ConstraintGraph::add_constraint(int v1, int v2) {
 }
 
 int ConstraintGraph::get_num_unassigned_var() {
-    return std::count_if(this->var_ptrs.begin(), this->var_ptrs.end(), [](VariablePtr var_ptr) {
-        return !var_ptr->is_assigned();
-        });
+    return std::count_if(this->var_ptrs.begin(), this->var_ptrs.end(),
+        [](VariablePtr var_ptr) {
+            return !var_ptr->is_assigned();
+        }
+    );
 }
 
 /**
