@@ -4,6 +4,4 @@
 struct MaxDegreeHeuristic: VariableOrderHeuristic {
     MaxDegreeHeuristic(const ConstraintGraphPtrWk);
     VariablePtr next_var();
-private:
-    int degree(VariablePtr);
 };

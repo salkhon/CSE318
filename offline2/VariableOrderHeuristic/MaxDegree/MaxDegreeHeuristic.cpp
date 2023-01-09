@@ -4,10 +4,6 @@ MaxDegreeHeuristic::MaxDegreeHeuristic(const ConstraintGraphPtrWk constraint_gra
     VariableOrderHeuristic{ constraint_graph_ptrwk } {
 }
 
-int MaxDegreeHeuristic::degree(VariablePtr var_ptr) {
-    return this->constraint_graph_ptrwk.lock()->var_graph[var_ptr->id].size();
-}
-
 VariablePtr MaxDegreeHeuristic::next_var() {
     const auto constraint_graph_ptr = this->constraint_graph_ptrwk.lock();
     VariablePtr target_var_ptr = nullptr;
@@ -18,7 +14,7 @@ VariablePtr MaxDegreeHeuristic::next_var() {
             &&
             (target_var_ptr == nullptr
                 ||
-                degree(var_ptr) > degree(target_var_ptr))
+                degree(var_ptr, constraint_graph_ptr) > degree(target_var_ptr, constraint_graph_ptr))
             ) {
             target_var_ptr = var_ptr;
         }

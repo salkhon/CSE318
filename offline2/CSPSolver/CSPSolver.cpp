@@ -147,24 +147,6 @@ void fill_solution_board(std::vector<std::vector<int>>& solution_board, const st
 }
 
 /**
- * @brief Get the potential number of potential domain reductions as a result of the proposed assignment.
- *
- * @param val Proposed value
- * @param var_ptr Assignee
- * @param constraint_graph_ptr Variable constraint graph
- * @return int Number of domain potential domain reductions
- */
-int num_overlap_with_neighbor_domain(int val, const VariablePtr var_ptr, const ConstraintGraphPtr constraint_graph_ptr) {
-    const auto& neighbors = constraint_graph_ptr->var_graph[var_ptr->id];
-    return std::count_if(neighbors.begin(), neighbors.end(),
-        [val, constraint_graph_ptr](int var_id) {
-            const auto& neighbor_domain = constraint_graph_ptr->var_ptrs[var_id]->domain;
-    return std::find(neighbor_domain.begin(), neighbor_domain.end(), val) != neighbor_domain.end();
-        }
-    );
-}
-
-/**
  * @brief Gets the value ordering for a variable. This prefers less constraining values first. Goes through the
  * domain and sorts on the number of reduced domain for the neighboring variables.
  *
@@ -173,17 +155,25 @@ int num_overlap_with_neighbor_domain(int val, const VariablePtr var_ptr, const C
  */
 std::vector<int> CSPSolver::get_var_val_order(VariablePtr var_ptr) {
     std::vector<int> val_order{ var_ptr->domain };
+    std::vector<int> val_overlap_count(this->board.size(), 0);
+
+    // count the occurrence of each possible value in var_ptr neighbor variable domains
+    for (int nbr_id : this->constraint_graph_ptr->var_graph[var_ptr->id]) {
+        for (int dom_val : this->constraint_graph_ptr->var_ptrs[nbr_id]->domain) {
+            val_overlap_count[dom_val - 1]++;
+        }
+    }
+
     std::sort(val_order.begin(), val_order.end(),
-        [var_ptr, this](int val1, int val2) {
-            return num_overlap_with_neighbor_domain(val1, var_ptr, this->constraint_graph_ptr) <
-            num_overlap_with_neighbor_domain(val2, var_ptr, this->constraint_graph_ptr);
+        [&val_overlap_count](int val1, int val2) {
+            return val_overlap_count[val1 - 1] < val_overlap_count[val2 - 1];
         }
     );
     return val_order;
 }
 
 /**
- * @brief Remove the assigned value from the domain of neighboring variables.
+ * @brief Remove the assigned value from the domain of neighboring unassigned variables.
  *
  * @param val Assigned value
  * @param neighbor_vars Constraint neighbors of the assigned variable
@@ -194,6 +184,10 @@ std::vector<int> reduce_domain(int val, const std::vector<int>& neighbor_vars, c
     std::vector<int> reduced_vars;
 
     for (auto neighbord_id : neighbor_vars) {
+        if (var_ptrs[neighbord_id]->is_assigned()) {
+            continue;
+        }
+        // reduce domain only for unassigned variables
         auto& neighbor_domain = var_ptrs[neighbord_id]->domain;
         auto val_pos_iter = std::find(neighbor_domain.begin(), neighbor_domain.end(), val);
         if (val_pos_iter != neighbor_domain.end()) {
@@ -249,43 +243,66 @@ void CSPSolver::undo_inference(int val, const std::vector<int>& reduced_vars) {
 }
 
 /**
+ * @brief Recursive CSP Solver.
+ *
+ * @param n_var_assigned Number of variables assigned so far
+ * @return true If assignment on this branch is successful
+ * @return false otherwise
+ */
+bool CSPSolver::solve_helper(int n_var_assigned) {
+    // if complete, fill solution board
+    if (n_var_assigned == this->constraint_graph_ptr->var_ptrs.size()) {
+        fill_solution_board(this->solution_board, this->constraint_graph_ptr->var_ptrs);
+        return true;
+    }
+    
+    this->num_nodes++;
+
+    // if no recursive call is made, this is a leaf node
+    bool any_branch_taken = false;
+
+    // get variables according to the heuristic
+    auto var_ptr = this->voh_ptr->next_var();
+
+    // get least constraining value ordering
+    for (int val : this->get_var_val_order(var_ptr)) {
+        // initial neighbor consistency checking
+        if (this->constraint_graph_ptr->is_consistent_assignment(val, var_ptr)) {
+            var_ptr->val = val;
+
+            // check if some domain becomes empty after reduction, if not proceed deeper in the branch
+            auto [is_success, reduced_vars] = this->inference(var_ptr);
+            if (is_success) {
+                any_branch_taken = true;
+                if (this->solve_helper(n_var_assigned + 1)) {
+                    return true;
+                }
+            }
+
+            // undo domain reduction
+            this->undo_inference(val, reduced_vars);
+
+            // if domain became empty or deeper branch failed - try another value
+            var_ptr->erase_assignment();
+        }
+    }
+
+    if (!any_branch_taken) {
+        // leaf node
+        this->num_backtrack++;
+    }
+
+    // no value succeeded, this branch failed
+    return false;
+}
+
+/**
  * @brief Solves the latin square board
  *
  * @return true if successfull solve, solution in `solution_board` property
  * @return false otherwise
  */
 bool CSPSolver::solve() {
-    // if complete, fill solution board
-    if (is_all_vars_assigned(this->constraint_graph_ptr->var_ptrs)) {
-        fill_solution_board(this->solution_board, this->constraint_graph_ptr->var_ptrs);
-        return true;
-    }
-
-    this->num_nodes++;
-
-    // get variables according to the heuristic
-    auto var_ptr = this->voh_ptr->next_var();
-    // get least constraining value ordering
-    for (int val : this->get_var_val_order(var_ptr)) {
-        // initial neigbor consistency checking
-        if (this->constraint_graph_ptr->is_consistent_assignment(val, var_ptr)) {
-            var_ptr->val = val;
-            // check if some domain becomes empty after reduction, if not proceed deeper in the branch
-            auto [is_success, reduced_vars] = this->inference(var_ptr);
-            if (is_success && this->solve()) {
-                return true;
-            } else if (!is_success) {
-                this->num_nodes++; // inference is also a node exploration
-            }
-
-            this->num_backtrack++;
-            // undo domain reduction
-            this->undo_inference(val, reduced_vars);
-            // if domain became empty or deeper branch failed - try another value
-            var_ptr->erase_assignment();
-        }
-    }
-    // no value succeeded, this branch failed
-    return false;
+    return this->solve_helper(0);
 }
 

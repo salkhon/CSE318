@@ -5,12 +5,9 @@ DomainSizeByDegreeHeuristic::DomainSizeByDegreeHeuristic(const ConstraintGraphPt
     VariableOrderHeuristic{ constraint_graph_ptrwk } {
 }
 
-int DomainSizeByDegreeHeuristic::degree(VariablePtr var_ptr) {
-    return this->constraint_graph_ptrwk.lock()->var_graph[var_ptr->id].size();
-}
 
-double DomainSizeByDegreeHeuristic::score(VariablePtr var_ptr) {
-    return var_ptr->domain.size() / degree(var_ptr);
+double DomainSizeByDegreeHeuristic::score(const VariablePtr var_ptr, const ConstraintGraphPtr constraint_graph_ptr) {
+    return var_ptr->domain.size() / degree(var_ptr, this->constraint_graph_ptrwk.lock());
 }
 
 VariablePtr DomainSizeByDegreeHeuristic::next_var() {
@@ -23,7 +20,7 @@ VariablePtr DomainSizeByDegreeHeuristic::next_var() {
             &&
             (target_var_ptr == nullptr
                 ||
-                score(var_ptr) < score(target_var_ptr))
+                score(var_ptr, constraint_graph_ptr) < score(target_var_ptr, constraint_graph_ptr))
             ) {
             target_var_ptr = var_ptr;
         }

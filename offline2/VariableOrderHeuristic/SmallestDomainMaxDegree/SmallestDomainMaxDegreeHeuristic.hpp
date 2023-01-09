@@ -5,6 +5,4 @@
 struct SmallestDomainMaxDegreeHeuristic: VariableOrderHeuristic {
     SmallestDomainMaxDegreeHeuristic(const ConstraintGraphPtrWk);
     VariablePtr next_var();
-private:
-    int degree(VariablePtr);
 };

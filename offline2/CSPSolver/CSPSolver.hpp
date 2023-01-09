@@ -20,6 +20,7 @@ struct CSPSolver {
     CSPSolver(std::vector<std::vector<int>>, int, bool = true);
     bool solve();
 private:
+    bool solve_helper(int);
     std::vector<int> get_var_val_order(VariablePtr);
     std::pair<bool, std::vector<int>> inference(VariablePtr);
     void undo_inference(int, const std::vector<int>&);

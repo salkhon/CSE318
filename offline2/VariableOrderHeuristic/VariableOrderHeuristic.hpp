@@ -12,4 +12,6 @@ protected:
     const ConstraintGraphPtrWk constraint_graph_ptrwk;
 };
 
+int degree(const VariablePtr, const ConstraintGraphPtr);
+
 using VOHPtr = std::shared_ptr<VariableOrderHeuristic>;

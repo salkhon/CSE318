@@ -9,7 +9,7 @@ for data_file in ./data/*; do
     for voh in {1..5}; do
         make clean
         make
-        output=$(timeout 30m ./main.out 0 $(($voh)) "$data_file")
+        output=$(timeout 20m ./main.out 0 $(($voh)) "$data_file")
         if [[ $? -eq 124 ]]; then
             output='-1,-1,-1'
         fi
@@ -19,7 +19,7 @@ for data_file in ./data/*; do
     for voh in {1..5}; do
         make clean
         make
-        output=$(timeout 30m ./main.out 1 $(($voh)) "$data_file")
+        output=$(timeout 20m ./main.out 1 $(($voh)) "$data_file")
         if [[ $? -eq 124 ]]; then
             output='-1,-1,-1'
         fi
