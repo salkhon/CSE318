@@ -1,5 +1,8 @@
 #pragma once
-#include "../definitions.hpp"
+#include <vector>
+#include <memory>
+#include <algorithm>
+#include "../Variable/Variable.hpp"
 
 struct ConstraintGraph {
     std::vector<VarPtr> var_ptrs;
@@ -11,3 +14,6 @@ struct ConstraintGraph {
     bool is_adj(int, int);
     int degree(int);
 };
+
+using ConstraintGraphPtr = std::shared_ptr<ConstraintGraph>;
+using ConstraintGraphPtrWk = std::weak_ptr<ConstraintGraph>;

@@ -1,14 +1,15 @@
 #include "ConstraintGraph.hpp"
+#include <iostream>
 
 ConstraintGraph::ConstraintGraph(const std::vector<VarPtr>& var_ptrs)
-    : var_ptrs{ var_ptrs }, adj_list{ var_ptrs.size() } {
+    : var_ptrs{ var_ptrs }, adj_list{ var_ptrs.size(), std::vector<int>() } {
 }
 
-void ConstraintGraph::add_edge(int c1, int c2) {
-    if (std::find(this->adj_list[c1].begin(), this->adj_list[c1].end(), c2) == this->adj_list[c1].end()) {
+void ConstraintGraph::add_edge(int v1, int v2) {
+    if (std::find(this->adj_list[v1].begin(), this->adj_list[v1].end(), v2) == this->adj_list[v1].end()) {
         // if its true for c1 is true, its true for c2
-        this->adj_list[c1].push_back(c2);
-        this->adj_list[c2].push_back(c1);
+        this->adj_list[v1].push_back(v2);
+        this->adj_list[v2].push_back(v1);
     }
 }
 
