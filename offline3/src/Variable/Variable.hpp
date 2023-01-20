@@ -1,6 +1,8 @@
 #pragma once
 #include "../definitions.hpp"
 
-class Variable {
+struct Variable {
+    int id, nstudents, day;
 
+    Variable(int, int);
 };

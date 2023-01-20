@@ -72,8 +72,8 @@ void print_vec(std::vector<T> vec) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 5) {
-        std::cout << "Wrong argument format. Please pass in dataset name, penalty, constructive heuristic, perturbative heuristic in order" << std::endl;
+    if (argc != 4) {
+        std::cout << "Wrong argument format. Please pass in dataset name, penalty, constructive heuristic in order" << std::endl;
     }
 
     std::string dataset = argv[1], penalty = argv[2], constructive = argv[3], perturbative = argv[4];
@@ -81,8 +81,11 @@ int main(int argc, char* argv[]) {
     auto course_nstudents = read_course_file(dataset);
     auto student_courses = read_student_file(dataset);
 
-    print_vec(course_nstudents);
-    print_vec(student_courses[0]);
+    Solver solver(course_nstudents, student_courses);
+    solver.solve();
+
+    std::cout << dataset << "," << solver.get_ntimeslots() << "," << solver.get_penalty_after_constructive() <<
+        "," << solver.get_penalty_after_kempe() << "," << solver.get_penalty_after_pairswap() << std::endl;
 
     return 0;
 }
