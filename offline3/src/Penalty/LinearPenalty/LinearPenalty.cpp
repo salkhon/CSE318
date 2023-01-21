@@ -4,7 +4,6 @@ LinearPenalty::LinearPenalty(const ConstraintGraphPtrWk con_graph_ptrwk)
     : Penalty{ con_graph_ptrwk } {
 }
 
-double LinearPenalty::get_penalty() {
-    auto con_graph_ptr = this->con_graph_ptrwk.lock();
-    return 0.0;
+float LinearPenalty::get_penalty() {
+    return this->get_sum_of_gap_between_neighbors() * 2;
 }

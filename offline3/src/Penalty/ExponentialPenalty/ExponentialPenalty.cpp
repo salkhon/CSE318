@@ -4,6 +4,6 @@ ExponentialPenalty::ExponentialPenalty(const ConstraintGraphPtrWk con_graph_ptrw
     : Penalty{ con_graph_ptrwk } {
 }
 
-double ExponentialPenalty::get_penalty() {
-    return 0.0;
+float ExponentialPenalty::get_penalty() {
+    return std::pow(2, this->get_sum_of_gap_between_neighbors());
 }

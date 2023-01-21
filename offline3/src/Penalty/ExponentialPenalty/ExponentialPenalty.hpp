@@ -1,7 +1,8 @@
 #pragma once
 #include "../Penalty.hpp"
+#include <cmath>
 
 struct ExponentialPenalty: public Penalty {
     ExponentialPenalty(const ConstraintGraphPtrWk);
-    double get_penalty();
+    float get_penalty();
 };

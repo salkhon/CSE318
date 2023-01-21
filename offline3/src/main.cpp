@@ -89,12 +89,9 @@ int main(int argc, char* argv[]) {
     Solver solver(course_nstudents, student_courses, (PenaltyType) penalty, (ConstructiveHeuristicType) constructive);
     solver.solve();
 
-    for (auto var_ptr : solver.constraint_graph_ptr->var_ptrs) {
-        std::cout << "var"<< var_ptr->id << " : day " << var_ptr->day << std::endl; 
-    }
-
     std::cout << dataset << "," << solver.get_ntimeslots() << "," << solver.get_penalty_after_constructive() <<
         "," << solver.get_penalty_after_kempe() << "," << solver.get_penalty_after_pairswap() << std::endl;
+    
 
     return 0;
 }
