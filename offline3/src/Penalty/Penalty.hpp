@@ -2,8 +2,13 @@
 #include <vector>
 #include <memory>
 
-class Penalty {
+#include "../ConstraintGraph/ConstraintGraph.hpp"
 
+struct Penalty {
+    const ConstraintGraphPtrWk con_graph_ptrwk;
+
+    Penalty(const ConstraintGraphPtrWk);
+    virtual double get_penalty() = 0;
 };
 
 using PenaltyPtr = std::shared_ptr<Penalty>;
