@@ -1,34 +1,44 @@
 #include "SaturationDegreeHeuristic.hpp"
 
-SaturationDegreeHeuristic::SaturationDegreeHeuristic(const ConstraintGraphPtrWk con_graph_ptrwk)
-    : ConstructiveHeuristic{ con_graph_ptrwk } {
+SaturationDegreeHeuristic::SaturationDegreeHeuristic(const ConstraintGraphPtrWk constraint_graph_ptrwk)
+    : ConstructiveHeuristic{ constraint_graph_ptrwk },
+    is_day_assigned(constraint_graph_ptrwk.lock()->var_ptrs.size(), false) {
 }
 
-std::vector<VarPtr> SaturationDegreeHeuristic::get_var_order() {
-    auto con_graph_ptr = this->con_graph_ptrwk.lock();
-    std::vector<VarPtr> ordered_var_ptrs{ con_graph_ptr->var_ptrs };
-    std::vector<int> npicked(ordered_var_ptrs.size(), 0);
+int SaturationDegreeHeuristic::get_ndays_in_neighbors(VarPtr var_ptr, ConstraintGraphPtr constraint_graph_ptr) {
+    // counts number of unique days in neighbors of var_ptr
+    std::fill(is_day_assigned.begin(), is_day_assigned.end(), false);
 
-    // selecting all var_ptrs.size() number of variables
-    for (size_t i = 0; i < ordered_var_ptrs.size(); i++) {
-        // node with largest assigned neighbor
-        auto var_ptr_iter = std::max_element(ordered_var_ptrs.begin() + i, ordered_var_ptrs.end(),
-            [&npicked, con_graph_ptr](VarPtr v1, VarPtr v2) {
-                return (
-                    npicked[v1->id] < npicked[v2->id]
-                    ||
-                    (npicked[v1->id] == npicked[v2->id] && con_graph_ptr->degree(v1->id) < con_graph_ptr->degree(v2->id))
-                    );
-            }
-        );
-
-        // incrementing assign count for picked node's neighbor
-        for (auto neighbor : con_graph_ptr->adj_list[(*var_ptr_iter)->id]) {
-            npicked[neighbor]++;
+    for (auto neighbor_id : constraint_graph_ptr->adj_list[var_ptr->id]) {
+        if (!constraint_graph_ptr->var_ptrs[neighbor_id]->is_day_assigned()) {
+            continue;
         }
-
-        std::iter_swap(ordered_var_ptrs.begin() + i, var_ptr_iter);
+        is_day_assigned[constraint_graph_ptr->var_ptrs[neighbor_id]->day] = true;
     }
 
-    return ordered_var_ptrs;
+    return std::count(is_day_assigned.begin(), is_day_assigned.end(), true);
+}
+
+void SaturationDegreeHeuristic::assign_variables_in_order() {
+    auto constraint_graph_ptr = this->constraint_graph_ptrwk.lock();
+
+    // pq to be updated with each assignment
+    auto pq_cmp = [this, constraint_graph_ptr](VarPtr v1, VarPtr v2) {
+        return this->get_ndays_in_neighbors(v1, constraint_graph_ptr) < this->get_ndays_in_neighbors(v2, constraint_graph_ptr);
+    }; // max heap by default
+
+    std::vector<VarPtr> pq{ constraint_graph_ptr->var_ptrs };
+    std::make_heap(pq.begin(), pq.end(), pq_cmp);
+
+    VarPtr var_ptr;
+    while (!pq.empty()) {
+        var_ptr = pq.front();
+        std::pop_heap(pq.begin(), pq.end(), pq_cmp);
+        pq.pop_back();
+
+        var_ptr->day = this->get_lowest_assignagble_day(var_ptr);
+
+        // update pq keys
+        std::make_heap(pq.begin(), pq.end(), pq_cmp);
+    }
 }

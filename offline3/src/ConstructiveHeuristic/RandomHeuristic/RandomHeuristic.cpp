@@ -1,10 +1,18 @@
 #include "RandomHeuristic.hpp"
 
-RandomHeuristic::RandomHeuristic(const ConstraintGraphPtrWk con_graph_ptrwk)
-    : ConstructiveHeuristic{con_graph_ptrwk} {
+RandomHeuristic::RandomHeuristic(const ConstraintGraphPtrWk constraint_graph_ptrwk)
+    : ConstructiveHeuristic{ constraint_graph_ptrwk } {
 }
 
-std::vector<VarPtr> RandomHeuristic::get_var_order() {
-    std::vector<VarPtr> ordered_var_ptrs{this->con_graph_ptrwk.lock()->var_ptrs};
+std::vector<VarPtr> get_var_order(ConstraintGraphPtr constraint_graph_ptr) {
+    std::vector<VarPtr> ordered_var_ptrs{ constraint_graph_ptr->var_ptrs };
+
     return ordered_var_ptrs;
+}
+
+void RandomHeuristic::assign_variables_in_order() {
+    auto constraint_graph_ptr = this->constraint_graph_ptrwk.lock();
+    for (auto var_ptr : get_var_order(constraint_graph_ptr)) {
+        var_ptr->day = this->get_lowest_assignagble_day(var_ptr);
+    }
 }

@@ -10,7 +10,7 @@
 struct RandomHeuristic: public ConstructiveHeuristic {
     RandomHeuristic(const ConstraintGraphPtrWk);
 
-    std::vector<VarPtr> get_var_order();
+    void assign_variables_in_order();
 };
 
 using RandHeuPtr = std::shared_ptr<RandomHeuristic>;

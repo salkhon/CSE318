@@ -4,5 +4,5 @@
 
 struct ExponentialPenalty: public Penalty {
     ExponentialPenalty(const ConstraintGraphPtrWk);
-    float get_penalty();
+    float apply(int);
 };

@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << dataset << "," << solver.get_ntimeslots() << "," << solver.get_penalty_after_constructive() <<
         "," << solver.get_penalty_after_kempe() << "," << solver.get_penalty_after_pairswap() << std::endl;
-    
+    std::cout << "is correct " << solver.is_sol_correct() << std::endl;
 
     return 0;
 }

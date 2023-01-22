@@ -9,7 +9,7 @@
 
 struct LargestEnrollmentHeuristic: public ConstructiveHeuristic {
     LargestEnrollmentHeuristic(const ConstraintGraphPtrWk);
-    std::vector<VarPtr> get_var_order();
+    void assign_variables_in_order();
 };
 
 using EnrollHeuPtr = std::shared_ptr<LargestEnrollmentHeuristic>;

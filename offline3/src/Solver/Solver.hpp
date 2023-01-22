@@ -25,7 +25,7 @@ enum PenaltyType {
 struct Solver {
     ConstraintGraphPtr constraint_graph_ptr;
     PenaltyPtr penalty_ptr;
-    ConHeuPtr con_heu_ptr;
+    ConHeuPtr constructive_heu_ptr;
     KempePtr kempe_ptr;
     PairSwapPtr pair_swap_ptr;
 

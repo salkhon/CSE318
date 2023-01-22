@@ -4,14 +4,17 @@ KempeChain::KempeChain(const ConstraintGraphPtrWk constraint_graph_ptrwk)
     : constraint_graph_ptrwk{ constraint_graph_ptrwk } {
 }
 
-std::vector<VarPtr> kempechain_using_dfs(ConstraintGraphPtr constraint_graph_ptr, VarPtr starting_var_ptr, int day1, int day2) {
+std::vector<VarPtr> kempechain_using_bfs(ConstraintGraphPtr constraint_graph_ptr, int starting_var_id, int starting_neighbor_id) {
     std::queue<int> q;
     std::vector<VarPtr> kempechain;
     std::vector<bool> is_visited(constraint_graph_ptr->var_ptrs.size(), false);
 
-    q.push(starting_var_ptr->id);
-    is_visited[starting_var_ptr->id] = true;
-    kempechain.push_back(starting_var_ptr);
+    int day1 = constraint_graph_ptr->var_ptrs[starting_var_id]->day;
+    int day2 = constraint_graph_ptr->var_ptrs[starting_neighbor_id]->day;
+
+    q.push(starting_var_id);
+    is_visited[starting_var_id] = true;
+    kempechain.push_back(constraint_graph_ptr->var_ptrs[starting_var_id]);
 
     VarPtr curr_var_ptr, neighbor_var_ptr;
     while (!q.empty()) {
@@ -39,24 +42,21 @@ std::vector<VarPtr> kempechain_using_dfs(ConstraintGraphPtr constraint_graph_ptr
     return kempechain;
 }
 
-VarPtr get_course_assigned_at_day(int day, ConstraintGraphPtr constraint_graph_ptr) {
-    size_t start_idx = std::rand() % constraint_graph_ptr->var_ptrs.size();
-    size_t sz = constraint_graph_ptr->var_ptrs.size();
-    VarPtr target;
-    for (size_t i = 0; i < sz; i++) {
-        target = constraint_graph_ptr->var_ptrs[(start_idx + i) % sz];
-        if (target->day == day) {
-            break;
-        }
-    }
-    return target;
-}
-
-std::vector<VarPtr> KempeChain::get_kempe_chain(int day1, int day2) {
+std::tuple<std::vector<VarPtr>, int, int> KempeChain::get_random_kempe_chain() {
     auto constraint_graph_ptr = this->constraint_graph_ptrwk.lock();
-    // find a course assigned to day1
-    VarPtr starting_var_ptr = get_course_assigned_at_day(day1, constraint_graph_ptr);
+
+    int starting_var_id = std::rand() % constraint_graph_ptr->var_ptrs.size();
+    int day1 = constraint_graph_ptr->var_ptrs[starting_var_id]->day;
+
+    int nneighbors = constraint_graph_ptr->adj_list[starting_var_id].size();
+    if (nneighbors == 0) {
+        std::vector<VarPtr> kempechain{{constraint_graph_ptr->var_ptrs[starting_var_id]}};
+        return { kempechain, day1, day1 };
+    }
+
+    int starting_neighbor_id = constraint_graph_ptr->adj_list[starting_var_id][std::rand() % nneighbors];
+    int day2 = constraint_graph_ptr->var_ptrs[starting_neighbor_id]->day;
 
     // run DFS from that vertex with alternation between day1, day2
-    return kempechain_using_dfs(constraint_graph_ptr, starting_var_ptr, day1, day2);
+    return std::make_tuple(kempechain_using_bfs(constraint_graph_ptr, starting_var_id, starting_neighbor_id), day1, day2);
 }

@@ -3,5 +3,5 @@
 
 struct LinearPenalty: public Penalty {
     LinearPenalty(const ConstraintGraphPtrWk);
-    float get_penalty();
+    float apply(int);
 };

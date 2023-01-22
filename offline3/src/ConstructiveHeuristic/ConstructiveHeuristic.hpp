@@ -6,10 +6,14 @@
 #include "../ConstraintGraph/ConstraintGraph.hpp"
 
 struct ConstructiveHeuristic {
-    ConstraintGraphPtrWk con_graph_ptrwk;
+    ConstraintGraphPtrWk constraint_graph_ptrwk;
     
     ConstructiveHeuristic(const ConstraintGraphPtrWk);
-    virtual std::vector<VarPtr> get_var_order() = 0;
+    virtual void assign_variables_in_order() = 0;
+
+protected:
+    std::vector<bool> days_assigned;
+    int get_lowest_assignagble_day(VarPtr);
 };
 
 using ConHeuPtr = std::shared_ptr<ConstructiveHeuristic>;

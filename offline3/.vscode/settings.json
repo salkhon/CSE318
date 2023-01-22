@@ -37,6 +37,7 @@
         "utility": "cpp",
         "deque": "cpp",
         "unordered_map": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "map": "cpp"
     }
 }

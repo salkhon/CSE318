@@ -10,17 +10,17 @@ ConstraintGraphPtr _create_constraint_graph_ptr(const std::vector<int>& course_n
 }
 
 ConHeuPtr _create_constructive_heuristic_ptr(ConstructiveHeuristicType contype, ConstraintGraphPtr constraint_graph_ptr) {
-    ConHeuPtr con_heu_ptr = nullptr;
+    ConHeuPtr constructive_heu_ptr = nullptr;
     if (contype == LARGEST_DEGREE) {
-        con_heu_ptr = std::make_shared<LargestDegreeHeuristic>(constraint_graph_ptr);
+        constructive_heu_ptr = std::make_shared<LargestDegreeHeuristic>(constraint_graph_ptr);
     } else if (contype == LARGEST_ENROLLMENT) {
-        con_heu_ptr = std::make_shared<LargestEnrollmentHeuristic>(constraint_graph_ptr);
+        constructive_heu_ptr = std::make_shared<LargestEnrollmentHeuristic>(constraint_graph_ptr);
     } else if (contype == SATURATION_DEGREE) {
-        con_heu_ptr = std::make_shared<SaturationDegreeHeuristic>(constraint_graph_ptr);
+        constructive_heu_ptr = std::make_shared<SaturationDegreeHeuristic>(constraint_graph_ptr);
     } else if (contype == RANDOM) {
-        con_heu_ptr = std::make_shared<RandomHeuristic>(constraint_graph_ptr);
+        constructive_heu_ptr = std::make_shared<RandomHeuristic>(constraint_graph_ptr);
     }
-    return con_heu_ptr;
+    return constructive_heu_ptr;
 }
 
 PenaltyPtr _create_penalty_ptr(PenaltyType pentype, ConstraintGraphPtr constraint_graph_ptr) {
@@ -41,7 +41,7 @@ Solver::Solver(
 )
     : constraint_graph_ptr{ _create_constraint_graph_ptr(course_nstudents) },
     penalty_ptr{ _create_penalty_ptr(penalty_type, this->constraint_graph_ptr) },
-    con_heu_ptr{ _create_constructive_heuristic_ptr(constructive_heuristic_type, this->constraint_graph_ptr) },
+    constructive_heu_ptr{ _create_constructive_heuristic_ptr(constructive_heuristic_type, this->constraint_graph_ptr) },
     kempe_ptr{ std::make_shared<KempeChain>(this->constraint_graph_ptr) },
     pair_swap_ptr{ std::make_shared<PairSwap>(this->constraint_graph_ptr) },
     nstudents{ student_courses.size() }, pen_after_constructive{ -1 }, pen_after_kempe{ -1 }, pen_after_swap{ -1 } {
@@ -55,25 +55,6 @@ Solver::Solver(
             }
         }
     }
-}
-
-int _get_lowest_assignable_day(VarPtr var_ptr, ConstraintGraphPtr constraint_graph_ptr, std::vector<bool>& days_assigned) {
-    for (auto neighbor_id : constraint_graph_ptr->adj_list[var_ptr->id]) {
-        if (!constraint_graph_ptr->var_ptrs[neighbor_id]->is_day_assigned()) {
-            continue;
-        }
-
-        days_assigned[constraint_graph_ptr->var_ptrs[neighbor_id]->day] = true;
-    }
-
-    // find lowest unmarked day
-    int lowest_day = 0;
-    while (days_assigned[lowest_day]) {
-        lowest_day++;
-    }
-
-    std::fill(days_assigned.begin(), days_assigned.end(), false);
-    return lowest_day;
 }
 
 void swap_kempechain_day(const std::vector<VarPtr>& var_ptrs, int day1, int day2) {
@@ -98,37 +79,46 @@ void swap_kempechain_day(const std::vector<VarPtr>& var_ptrs, int day1, int day2
  */
 void Solver::solve() {
     // CONSTRUCTIVE
-    int newday = 0, lowest_day = 0;
-    const auto& var_ptrs_order = this->con_heu_ptr->get_var_order();
-    std::vector<bool> days_assigned(this->constraint_graph_ptr->var_ptrs.size(), false);
-
-    for (auto var_ptr : var_ptrs_order) {
-        lowest_day = _get_lowest_assignable_day(var_ptr, this->constraint_graph_ptr, days_assigned);
-        var_ptr->day = lowest_day;
-    }
+    this->constructive_heu_ptr->assign_variables_in_order();
 
     this->pen_after_constructive = this->penalty_ptr->get_penalty() / this->nstudents;
-
-    // KEMPE CHAIN
     int totaldays = this->get_ntimeslots();
     float curr_pen, prev_pen = this->pen_after_constructive;
-    int day1, day2;
+
+    // // KEMPE CHAIN
+    // for (size_t i = 0; i < 1000; i++) {
+    //     auto [kempechain, day1, day2] = this->kempe_ptr->get_random_kempe_chain();
+    //     if (kempechain.size() == 1) {
+    //         continue;
+    //     }
+    //     swap_kempechain_day(kempechain, day1, day2);
+
+    //     curr_pen = this->penalty_ptr->get_penalty() / this->nstudents;
+    //     if (curr_pen > prev_pen) {
+    //         swap_kempechain_day(kempechain, day1, day2); // undo swap
+    //     } else {
+    //         prev_pen = curr_pen;
+    //         std::cout << "successful swap" << std::endl;
+    //     }
+    // }
+    // this->pen_after_kempe = prev_pen;
+
+    // PAIR SWAP
     for (size_t i = 0; i < 1000; i++) {
-        day1 = std::rand() % totaldays;
-        day2 = (day1 + std::rand() % totaldays) % totaldays;
-
-        auto kempechain = this->kempe_ptr->get_kempe_chain(day1, day2);
-        swap_kempechain_day(kempechain, day1, day2);
-
-        curr_pen = this->penalty_ptr->get_penalty() / this->nstudents;
-        if (curr_pen >= prev_pen) {
-            swap_kempechain_day(kempechain, day1, day2); // undo swap
-        } else {
-            prev_pen = curr_pen;
-            std::cout << i << std::endl;
+        auto [v1, v2] = this->pair_swap_ptr->get_swappable_pair();
+        if (v1 >= 0 && v2 >= 0) {
+            std::swap(this->constraint_graph_ptr->var_ptrs[v1]->day, this->constraint_graph_ptr->var_ptrs[v2]->day);
+            curr_pen = this->penalty_ptr->get_penalty() / this->nstudents;
+            if (curr_pen > prev_pen) {
+                std::cout << curr_pen << " " << prev_pen << std::endl;
+                std::swap(this->constraint_graph_ptr->var_ptrs[v1]->day, this->constraint_graph_ptr->var_ptrs[v2]->day); // undo
+            } else {
+                prev_pen = curr_pen;
+            }
         }
     }
-    this->pen_after_kempe = prev_pen;
+
+    this->pen_after_swap = this->penalty_ptr->get_penalty() / this->nstudents;
 }
 
 int Solver::get_ntimeslots() {

@@ -9,7 +9,7 @@
 
 struct LargestDegreeHeuristic: public ConstructiveHeuristic {
     LargestDegreeHeuristic(const ConstraintGraphPtrWk);
-    std::vector<VarPtr> get_var_order();
+    void assign_variables_in_order();
 };
 
 using DegreeHeuPtr = std::shared_ptr<LargestDegreeHeuristic>;
