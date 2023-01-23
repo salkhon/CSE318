@@ -2,7 +2,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include <random>
+#include <cstdlib>
 
 #include "../Variable/Variable.hpp"
 #include "../ConstraintGraph/ConstraintGraph.hpp"

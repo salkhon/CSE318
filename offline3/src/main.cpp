@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <cstdlib>
 #include "Solver/Solver.hpp"
 
 const std::string DATA_PATH = "../data/";
@@ -86,12 +87,14 @@ int main(int argc, char* argv[]) {
     auto course_nstudents = read_course_file(dataset);
     auto student_courses = read_student_file(dataset);
 
-    Solver solver(course_nstudents, student_courses, (PenaltyType) penalty, (ConstructiveHeuristicType) constructive);
+    srand(time(0));
+    Solver solver(course_nstudents, student_courses, (PenaltyType)penalty, (ConstructiveHeuristicType)constructive);
     solver.solve();
 
-    std::cout << dataset << "," << solver.get_ntimeslots() << "," << solver.get_penalty_after_constructive() <<
+    std::cout << dataset << "," << penalty << "," << constructive << ","
+        << solver.get_ntimeslots() << "," << solver.get_penalty_after_constructive() <<
         "," << solver.get_penalty_after_kempe() << "," << solver.get_penalty_after_pairswap() << std::endl;
-    std::cout << "is correct " << solver.is_sol_correct() << std::endl;
+    // std::cout << "is correct " << solver.is_sol_correct() << std::endl;
 
     return 0;
 }

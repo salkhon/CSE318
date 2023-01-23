@@ -34,3 +34,15 @@ int ConstraintGraph::nconflicts_for_pair(int v1, int v2) {
     }
     return this->nconflicts[v1][v2];
 }
+
+std::ostream& operator<<(std::ostream& ostrm, const ConstraintGraph& constraint_graph) {
+    ostrm << "Constraint Graph: \n";
+    for (size_t v = 0; v < constraint_graph.var_ptrs.size(); v++) {
+        ostrm << "\tVar " << v << "\t: ";
+        for (auto n : constraint_graph.adj_list[v]) {
+            ostrm << n << " ";
+        }
+        ostrm << "\n";
+    }
+    return ostrm;
+}

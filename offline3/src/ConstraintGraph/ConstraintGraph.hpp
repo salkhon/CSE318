@@ -16,6 +16,7 @@ struct ConstraintGraph {
     bool is_adj(int, int);
     int degree(int);
     int nconflicts_for_pair(int, int);
+    friend std::ostream& operator<< (std::ostream& ostrm, const ConstraintGraph& var);
 };
 
 using ConstraintGraphPtr = std::shared_ptr<ConstraintGraph>;

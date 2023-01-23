@@ -46,8 +46,6 @@ Solver::Solver(
     pair_swap_ptr{ std::make_shared<PairSwap>(this->constraint_graph_ptr) },
     nstudents{ student_courses.size() }, pen_after_constructive{ -1 }, pen_after_kempe{ -1 }, pen_after_swap{ -1 } {
 
-    srand(time(0));
-
     for (const auto& courses : student_courses) {
         for (size_t i = 0; i < courses.size(); i++) {
             for (size_t j = i + 1; j < courses.size(); j++) {
@@ -57,26 +55,26 @@ Solver::Solver(
     }
 }
 
-void swap_kempechain_day(const std::vector<VarPtr>& var_ptrs, int day1, int day2) {
+void swap_kempechain_day(std::vector<VarPtr>& var_ptrs, int day1, int day2) {
     for (auto var_ptr : var_ptrs) {
         if (var_ptr->day == day1) {
             var_ptr->day = day2;
         } else {
-            var_ptr->day == day1;
+            var_ptr->day = day1;
         }
     }
 }
 
-/**
- * @brief
- * 1. Place the courses without conflict
- *      Solve hard constraint with constructuve heuristic
- *      - Start with one color (day 1)
- *      - If the next exam conflicts, increase day count
- * 2. Search to minimize penalty
- *      Solve soft constraint with perturbative heuristic
- *
- */
+bool is_kempe_chain_correct(const std::vector<VarPtr>& varptrs) {
+    std::vector<int> days;
+    for (auto varptr : varptrs) {
+        if (std::find(days.begin(), days.end(), varptr->day) == days.end()) {
+            days.push_back(varptr->day);
+        }
+    }
+    return days.size() == 2;
+}
+
 void Solver::solve() {
     // CONSTRUCTIVE
     this->constructive_heu_ptr->assign_variables_in_order();
@@ -85,23 +83,22 @@ void Solver::solve() {
     int totaldays = this->get_ntimeslots();
     float curr_pen, prev_pen = this->pen_after_constructive;
 
-    // // KEMPE CHAIN
-    // for (size_t i = 0; i < 1000; i++) {
-    //     auto [kempechain, day1, day2] = this->kempe_ptr->get_random_kempe_chain();
-    //     if (kempechain.size() == 1) {
-    //         continue;
-    //     }
-    //     swap_kempechain_day(kempechain, day1, day2);
+    // KEMPE CHAIN
+    for (size_t i = 0; i < 1000; i++) {
+        auto [kempechain, day1, day2] = this->kempe_ptr->get_random_kempe_chain();
+        if (kempechain.size() == 1) {
+            continue;
+        }
+        swap_kempechain_day(kempechain, day1, day2);
 
-    //     curr_pen = this->penalty_ptr->get_penalty() / this->nstudents;
-    //     if (curr_pen > prev_pen) {
-    //         swap_kempechain_day(kempechain, day1, day2); // undo swap
-    //     } else {
-    //         prev_pen = curr_pen;
-    //         std::cout << "successful swap" << std::endl;
-    //     }
-    // }
-    // this->pen_after_kempe = prev_pen;
+        curr_pen = this->penalty_ptr->get_penalty() / this->nstudents;
+        if (curr_pen > prev_pen) {
+            swap_kempechain_day(kempechain, day1, day2); // undo swap
+        } else {
+            prev_pen = curr_pen;
+        }
+    }
+    this->pen_after_kempe = prev_pen;
 
     // PAIR SWAP
     for (size_t i = 0; i < 1000; i++) {
@@ -110,7 +107,6 @@ void Solver::solve() {
             std::swap(this->constraint_graph_ptr->var_ptrs[v1]->day, this->constraint_graph_ptr->var_ptrs[v2]->day);
             curr_pen = this->penalty_ptr->get_penalty() / this->nstudents;
             if (curr_pen > prev_pen) {
-                std::cout << curr_pen << " " << prev_pen << std::endl;
                 std::swap(this->constraint_graph_ptr->var_ptrs[v1]->day, this->constraint_graph_ptr->var_ptrs[v2]->day); // undo
             } else {
                 prev_pen = curr_pen;

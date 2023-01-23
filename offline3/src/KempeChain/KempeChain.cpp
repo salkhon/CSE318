@@ -1,4 +1,5 @@
 #include "KempeChain.hpp"
+#include <iostream>
 
 KempeChain::KempeChain(const ConstraintGraphPtrWk constraint_graph_ptrwk)
     : constraint_graph_ptrwk{ constraint_graph_ptrwk } {
@@ -50,8 +51,7 @@ std::tuple<std::vector<VarPtr>, int, int> KempeChain::get_random_kempe_chain() {
 
     int nneighbors = constraint_graph_ptr->adj_list[starting_var_id].size();
     if (nneighbors == 0) {
-        std::vector<VarPtr> kempechain{{constraint_graph_ptr->var_ptrs[starting_var_id]}};
-        return { kempechain, day1, day1 };
+        return { {constraint_graph_ptr->var_ptrs[starting_var_id]}, day1, day1 };
     }
 
     int starting_neighbor_id = constraint_graph_ptr->adj_list[starting_var_id][std::rand() % nneighbors];
