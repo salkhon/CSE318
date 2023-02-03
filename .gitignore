@@ -37,3 +37,5 @@ submission/
 data/
 spec/
 .vscode/
+provided-code/
+venv/
