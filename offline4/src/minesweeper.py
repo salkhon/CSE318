@@ -70,6 +70,15 @@ class Minesweeper():
                 if (i, j) == cell:
                     continue
 
+                # ignore diagonals
+                if (i, j) in [
+                    (cell[0] - 1, cell[1] - 1),
+                    (cell[0] - 1, cell[1] + 1),
+                    (cell[0] + 1, cell[1] + 1),
+                    (cell[0] + 1, cell[1] - 1)
+                ]:
+                    continue
+
                 # Update count if cell in bounds and is mine
                 if 0 <= i < self.height and 0 <= j < self.width:
                     if self.board[i][j]:
